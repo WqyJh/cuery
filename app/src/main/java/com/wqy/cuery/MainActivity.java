@@ -1,11 +1,14 @@
 package com.wqy.cuery;
 
 import android.database.Cursor;
+import android.database.DataSetObserver;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btRegister;
     private DBHelper helper;
     private RelativeLayout container;
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +36,34 @@ public class MainActivity extends AppCompatActivity {
         etPassword = (EditText) findViewById(R.id.password);
         btLogin = (Button) findViewById(R.id.login);
         btRegister = (Button) findViewById(R.id.register);
-        helper= new DBHelper(this);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+        try {
+            helper= DBHelper.getInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM User", null);
+        adapter = new RecyclerViewAdapter(this, c, recyclerView);
+        recyclerView.setAdapter(adapter);
+
+        c.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                Log.d(TAG, "onChanged: Dataset changed");
+                SQLiteDatabase db = helper.getReadableDatabase();
+                Cursor c = db.rawQuery("SELECT * FROM User", null);
+                adapter.swapCursor(c);
+                c.registerDataSetObserver(this);
+            }
+
+            @Override
+            public void onInvalidated() {
+                onChanged();
+            }
+        });
 
         btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,11 +93,14 @@ public class MainActivity extends AppCompatActivity {
                 String username = String.valueOf(etUsername.getText());
                 String password = String.valueOf(etPassword.getText());
                 SQLiteDatabase db = helper.getWritableDatabase();
-                db.execSQL("INSERT INTO User(username,password) VALUES(?,?)", new String[] {username, password});
+                try {
+                    db.execSQL("INSERT INTO User(username,password) VALUES(?,?)", new String[] {username, password});
+                } catch (SQLiteConstraintException e) {
+                    e.printStackTrace();
+                    snackbar(R.string.register_failed);
+                }
             }
         });
-
-
     }
 
     public void snackbar(String message) {

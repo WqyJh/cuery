@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="@dimen/list_item_height"
+    android:divider="@drawable/divider"
+    android:gravity="center_horizontal">
+    <TextView
+        android:text="测试"
+        android:id="@+id/item_id"
+        style="@style/list_item_text" />
+    <TextView
+        android:text="测试"
+        android:id="@+id/item_username"
+        style="@style/list_item_text" />
+    <TextView
+        android:text="测试"
+        android:id="@+id/item_password"
+        style="@style/list_item_text" />
+</LinearLayout>
