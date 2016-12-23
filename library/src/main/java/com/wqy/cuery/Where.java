@@ -139,6 +139,10 @@ public class Where {
         return this;
     }
 
+    public Query endWhere() {
+        return this.query;
+    }
+
     /**
      * <p>
      * Add an AND condition which is a combination of the conditions in the
