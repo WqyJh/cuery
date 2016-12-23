@@ -10,7 +10,6 @@ import android.util.Log;
 import com.wqy.cuery.Query;
 import com.wqy.cuery.ResultSet;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,7 +70,7 @@ public class CueryTest {
                 .values(username, password)
                 .execute(db);
         assertFalse(rs.isEmpty());
-        assertTrue(rs.getRowInserted() > 0);
+        assertTrue(rs.getRowId() > 0);
 
         Cursor c = db.rawQuery("SELECT username, password FROM User WHERE username='" + username + "' AND password='" + password + "'", null);
         c.moveToFirst();

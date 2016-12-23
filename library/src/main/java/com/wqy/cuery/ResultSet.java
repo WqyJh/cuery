@@ -9,7 +9,7 @@ import android.database.Cursor;
 public class ResultSet {
     private Cursor cursor = null;
     private long rowAffected = 0;
-    private long rowInserted = 0;
+    private long rowId = 0;
     private boolean isEmpty = true;
     
     ResultSet() {
@@ -34,13 +34,13 @@ public class ResultSet {
         this.rowAffected = rowAffected;
     }
 
-    public long getRowInserted() {
-        return rowInserted;
+    public long getRowId() {
+        return rowId;
     }
 
-    public void setRowInserted(long rowInserted) {
+    public void setRowId(long rowId) {
         isEmpty = false;
-        this.rowInserted = rowInserted;
+        this.rowId = rowId;
     }
 
     public boolean isEmpty() {

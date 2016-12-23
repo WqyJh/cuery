@@ -63,7 +63,7 @@ public class Query {
                 rs.setCursor(c);
                 break;
             case INSERT:
-                rs.setRowInserted(
+                rs.setRowId(
                         performInsert(db)
                 );
                 break;
