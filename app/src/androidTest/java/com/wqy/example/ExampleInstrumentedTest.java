@@ -1,4 +1,4 @@
-package com.wqy.cuery;
+package com.wqy.example;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

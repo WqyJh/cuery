@@ -1,4 +1,4 @@
-package com.wqy.cuery;
+package com.wqy.example;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -40,6 +40,7 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DBContract.User.CREATE_TABLE);
+        db.execSQL(DBContract.Test.CREATE_TABLE);
     }
 
     @Override

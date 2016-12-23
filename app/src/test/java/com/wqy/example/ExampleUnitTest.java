@@ -1,4 +1,4 @@
-package com.wqy.cuery;
+package com.wqy.example;
 
 import org.junit.Test;
 

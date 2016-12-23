@@ -1,4 +1,4 @@
-package com.wqy.cuery;
+package com.wqy.example;
 
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -16,27 +16,38 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private EditText etUsername;
-    private EditText etPassword;
-    private Button btLogin;
-    private Button btRegister;
-    private DBHelper helper;
-    private RelativeLayout container;
-    private RecyclerView recyclerView;
+
+    @BindView(R.id.username)
+    public EditText etUsername;
+
+    @BindView(R.id.password)
+    public EditText etPassword;
+
+    @BindView(R.id.login)
+    public Button btLogin;
+
+    @BindView(R.id.register)
+    public Button btRegister;
+
+    @BindView(R.id.container)
+    public RelativeLayout container;
+
+    @BindView(R.id.recycler_view)
+    public RecyclerView recyclerView;
+
     private RecyclerViewAdapter adapter;
+    private DBHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        container = (RelativeLayout) findViewById(R.id.container);
-        etUsername = (EditText) findViewById(R.id.username);
-        etPassword = (EditText) findViewById(R.id.password);
-        btLogin = (Button) findViewById(R.id.login);
-        btRegister = (Button) findViewById(R.id.register);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        ButterKnife.bind(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         try {

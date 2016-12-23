@@ -1,7 +1,12 @@
 package com.wqy.cuery;
 
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,9 +50,104 @@ public class Query {
     private List<Object> insertValue = null;
 
     public Query() {
-        columns = new LinkedList<>();
-        values = new LinkedList<>();
-        updateValues = new LinkedList<>();
+        columns = new ArrayList<>();
+        values = new ArrayList<>();
+    }
+
+    public ResultSet execute(SQLiteDatabase db) {
+        beforeExecute();
+        ResultSet rs = new ResultSet();
+        switch (actionValue) {
+            case SELECT:
+                Cursor c = performQuery(db);
+                rs.setCursor(c);
+                break;
+            case INSERT:
+                rs.setRowInserted(
+                        performInsert(db)
+                );
+                break;
+            case UPDATE:
+                rs.setRowAffected(
+                        performUpdate(db)
+                );
+                break;
+            case DELETE:
+                rs.setRowAffected(
+                        performDelete(db)
+                );
+                break;
+            default:
+        }
+        return rs;
+    }
+
+
+    public Cursor performQuery(SQLiteDatabase db) {
+        String[] selectionArgs = mWhere == null ? null : mWhere.getStringArgs();
+        return db.rawQuery(sql, selectionArgs);
+    }
+
+    private SQLiteStatement createStatement(SQLiteDatabase db) {
+        SQLiteStatement statement = db.compileStatement(sql);
+        for (int i = 0; i < values.size(); i++) {
+            DatabaseUtils.bindObjectToProgram(statement, i + 1, values.get(i));
+        }
+        return statement;
+    }
+
+    public long performInsert(SQLiteDatabase db) {
+        long rowId = -1;
+        db.acquireReference();
+        try {
+            SQLiteStatement statement = createStatement(db);
+            try {
+                rowId = statement.executeInsert();
+            } finally {
+                statement.close();
+            }
+        } finally {
+            db.releaseReference();
+        }
+        return rowId;
+    }
+
+    public int performUpdate(SQLiteDatabase db) {
+        int affectedRows = 0;
+        db.acquireReference();
+        try {
+            SQLiteStatement statement = createStatement(db);
+            try {
+                affectedRows = statement.executeUpdateDelete();
+            } finally {
+                statement.close();
+            }
+        } finally {
+            db.releaseReference();
+        }
+        return affectedRows;
+    }
+
+    public int performDelete(SQLiteDatabase db) {
+        int rowsAffected = 0;
+        db.acquireReference();
+        try {
+            SQLiteStatement statement = createStatement(db);
+            try {
+                rowsAffected = statement.executeUpdateDelete();
+            } finally {
+                statement.close();
+            }
+        } finally {
+            db.releaseReference();
+        }
+        return rowsAffected;
+    }
+
+    public void beforeExecute() {
+        if (sql == null) {
+            getSql();
+        }
     }
 
     public String getSql() {
@@ -249,6 +349,9 @@ public class Query {
     }
 
     private void beforeUpdate() {
+        if (updateValues == null) {
+            updateValues = new ArrayList<>();
+        }
         if (updateBuilder == null) {
             updateBuilder = new StringBuilder();
         }
@@ -320,11 +423,6 @@ public class Query {
         return mWhere;
     }
 
-    public Query columns(@NonNull String column) {
-        this.columns.add(column);
-        return this;
-    }
-
     public Query limit(int n) {
         this.limit = n;
         return this;
@@ -342,5 +440,9 @@ public class Query {
 
     public List<Object> getValues() {
         return values;
+    }
+
+    public interface Callback {
+        void onResult(Cursor cursor);
     }
 }

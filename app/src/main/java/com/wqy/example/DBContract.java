@@ -1,4 +1,4 @@
-package com.wqy.cuery;
+package com.wqy.example;
 
 import android.provider.BaseColumns;
 
@@ -29,7 +29,7 @@ public final class DBContract {
         public static final String BLOB = "blobc";
         public static final String CREATE_TABLE = "CREATE TABLE " +
                 TABLE_NAME + "(" +
-                _ID + "INTEGER PRIMARY KEY AUTOINCREMENT," +
+                _ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 BLOB + " BLOB)";
     }
 }
