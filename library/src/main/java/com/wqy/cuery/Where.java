@@ -1,13 +1,10 @@
 package com.wqy.cuery;
 
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by wqy on 16-12-23.
@@ -19,7 +16,7 @@ public class Where {
     private Query query = null;
     private List<String> columns = null;
     private List<Object> args;
-    private int clauseNum = 0;
+    private int conditionCount = 0;
     private boolean negative = false;
     private boolean and = true;
 
@@ -29,9 +26,13 @@ public class Where {
         args = new LinkedList<>();
     }
 
+    public Where(Query belong) {
+        this();
+        this.query = belong;
+    }
+
     public String getWhereClause() {
         if (where == null) {
-            builder.deleteCharAt(builder.length() - 1);
             where = builder.toString();
         }
         return where;
@@ -78,14 +79,20 @@ public class Where {
         return this;
     }
 
-    private Where whereNotExists(@NonNull Query subQuery) {
+    public Where whereNotExists(@NonNull Query subQuery) {
         not();
         whereExists(subQuery);
         return this;
     }
 
-    private void containedIn(@NonNull String column, @NonNull Object[] values) {
-        builder.append(column).append("IN (");
+    private void containedIn(@NonNull String column, @NonNull Object[] values, boolean containedIn) {
+        builder.append(column);
+        if (containedIn) {
+            builder.append(" IN (");
+        } else {
+            builder.append(" NOT IN (");
+        }
+
         int i = 0;
         for (;i < values.length - 1; i++) {
             builder.append("?,");
@@ -97,20 +104,14 @@ public class Where {
     }
 
     public Where whereContainedIn(@NonNull String column, @NonNull Object[] values) {
-        if (values == null || values.length == 0) {
-            return this;
-        }
         before();
-        containedIn(column, values);
+        containedIn(column, values, true);
         return this;
     }
 
     public Where whereNotContainedIn(@NonNull String column, @NonNull Object[] values) {
-        if (values == null || values.length == 0) {
-            return this;
-        }
-        not();
-        whereContainedIn(column, values);
+        before();
+        containedIn(column, values, false);
         return this;
     }
 
@@ -128,13 +129,13 @@ public class Where {
 
     public Where whereLike(@NonNull String column, @NonNull String pattern) {
         before(column);
-        builder.append(column).append(" LIKE ").append(pattern);
+        builder.append(column).append(" LIKE '").append(pattern).append("'");
         return this;
     }
 
     public Where whereGlob(@NonNull String column, @NonNull String glob) {
         before(column);
-        builder.append(column).append(" GLOB ").append(glob);
+        builder.append(column).append(" GLOB '").append(glob).append("'");
         return this;
     }
 
@@ -148,7 +149,7 @@ public class Where {
      * @return a reference to this object.
      */
     public Where and(@NonNull Where where) {
-        return and(where.getWhereClause());
+        return and(where.getWhereClause(), where.getArgs());
     }
 
     /**
@@ -161,7 +162,7 @@ public class Where {
      * @return a reference to this object.
      */
     public Where or(@NonNull Where where) {
-        return or(where.getWhereClause());
+        return or(where.getWhereClause(), where.getArgs());
     }
 
     /**
@@ -208,29 +209,38 @@ public class Where {
      * @return a reference to this object.
      */
     public Where and(@NonNull String where, @NonNull Object[] values) {
-        if (args == null || values.length == 0) {
-            return this;
-        }
+        return and(where, Arrays.asList(values));
+    }
+
+    /**
+     * <p>
+     * Add an OR condition which is represented by the given string param. As it may be a
+     * combination of multiple conditions, it will be wrap by '(' and ')'.
+     * </p>
+     * @param where the sub where condition represented by string.
+     * @param values the arguments corresponded with the '?' in the <code>where</code>
+     * @return a reference to this object.
+     */
+    public Where or(@NonNull String where, @NonNull Object[] values) {
+        return or(where, Arrays.asList(values));
+    }
+
+    public Where and(@NonNull String where, @NonNull List<Object> values) {
         and();
         subWhere(where, values);
         return this;
     }
 
-    public Where or(@NonNull String where, @NonNull Object[] values) {
-        if (args == null || values.length == 0) {
-            return this;
-        }
+    public Where or(@NonNull String where, @NonNull List<Object> values) {
         or();
         subWhere(where, values);
         return this;
     }
 
-    private void subWhere(String where, Object[] values) {
+    private void subWhere(String where, List<Object> values) {
         before();
         builder.append("(").append(where).append(")");
-        for (int i = 0; i < values.length; i++) {
-            this.args.add(values[i]);
-        }
+        this.args.addAll(values);
     }
 
     /**
@@ -287,25 +297,25 @@ public class Where {
     }
 
     private void whenAnd() {
-        if (clauseNum > 0) {
+        if (conditionCount > 0) {
             builder.append(" AND ");
         }
         if (negative) {
-            builder.append(" NOT ");
+            builder.append("NOT ");
             negative = false;
         }
-        clauseNum++;
+        conditionCount++;
     }
 
     private void whenOr() {
-        if (clauseNum > 0) {
+        if (conditionCount > 0) {
             builder.append(" OR ");
         }
         if (negative) {
             builder.append(" NOT ");
             negative = false;
         }
-        clauseNum++;
+        conditionCount++;
     }
 
     private void whenAnd(String column) {
@@ -328,5 +338,45 @@ public class Where {
         whenOr();
         columns.add(column);
         args.add(value);
+    }
+
+    public String getWhere() {
+        return where;
+    }
+
+    public void setWhere(String where) {
+        this.where = where;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
+
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
+    }
+
+    public List<Object> getArgs() {
+        return args;
+    }
+
+    public void setArgs(List<Object> args) {
+        this.args = args;
+    }
+
+    public int getConditionCount() {
+        return conditionCount;
+    }
+
+    public void setConditionCount(int conditionCount) {
+        this.conditionCount = conditionCount;
     }
 }
