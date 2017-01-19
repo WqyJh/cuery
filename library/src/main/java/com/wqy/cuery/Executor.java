@@ -27,7 +27,8 @@ public class Executor {
     }
 
     /**
-     * Execute this Query.
+     * Execute the Query.
+     * @param query the Query to be execute
      * @param db the SQLiteDatabase to be applied to
      * @return a {@link ResultSet} object. If it's SELECT operation, it would contain a
      * {@link Cursor} object. If INSERT operation, id of the newly inserted row. Otherwise, number
@@ -62,12 +63,19 @@ public class Executor {
         return rs;
     }
 
+    /**
+     * Execute the query asynchronously.
+     * @param query the Query to be execute
+     * @param db the SQLiteDatabase to be applied to
+     * @param cb callback for result
+     */
     public void executeAsync(Query query, SQLiteDatabase db, Callback cb) {
         new QueryTask(cb).execute(query, db);
     }
 
     /**
      * Perform the SELECT operation.
+     * @param query the Query to be execute
      * @param db the SQLiteDatabase to be applied to
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
      * {@link Cursor}s are not synchronized, see the documentation for more details.
@@ -80,6 +88,7 @@ public class Executor {
 
     /**
      * Create a new SQLiteStatement.
+     * @param query the Query to be execute
      * @param db the SQLiteDatabase to be applied to
      * @return a {@link SQLiteStatement} object
      */
@@ -94,6 +103,7 @@ public class Executor {
 
     /**
      * Perform INSERT operation.
+     * @param query the Query to be execute
      * @param db the SQLiteDatabase to be applied to
      * @return the id of the newly inserted row
      */
@@ -115,6 +125,7 @@ public class Executor {
 
     /**
      * Perform the UPDATE operation.
+     * @param query the Query to be execute
      * @param db the SQLiteDatabase to be applied to
      * @return number of rows affected
      */
@@ -136,6 +147,7 @@ public class Executor {
 
     /**
      * Perform the DELETE operation.
+     * @param query the Query to be execute
      * @param db the SQLiteDatabase to be applied to
      * @return number of rows affected
      */
@@ -155,6 +167,10 @@ public class Executor {
         return rowsAffected;
     }
 
+    /**
+     * Usage:<br >
+     * <code>new QueryTask(callback).execute(query, db);</code>
+     */
     private class QueryTask extends AsyncTask<Object, Integer, ResultSet> {
         private Callback cb;
 

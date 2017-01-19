@@ -54,6 +54,14 @@ public class Query {
         values = new ArrayList<>();
     }
 
+    public ResultSet execute(SQLiteDatabase db) {
+        return Executor.getInstance().execute(this, db);
+    }
+
+    public void executeAsync(SQLiteDatabase db, Executor.Callback cb) {
+        Executor.getInstance().executeAsync(this, db, cb);
+    }
+
 //    /**
 //     * Execute this Query.
 //     * @param db the SQLiteDatabase to be applied to
