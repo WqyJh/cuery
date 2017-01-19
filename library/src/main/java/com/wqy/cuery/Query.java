@@ -24,8 +24,8 @@ public class Query {
     public static final int DELETE = 4;
 
     private String sql = null;
-    private String action = null;
     private String table = null;
+    private String action = null;
     private String where = null;
     private String group = null;
     private String having = null;
@@ -54,136 +54,136 @@ public class Query {
         values = new ArrayList<>();
     }
 
-    /**
-     * Execute this Query.
-     * @param db the SQLiteDatabase to be applied to
-     * @return a {@link ResultSet} object. If it's SELECT operation, it would contain a
-     * {@link Cursor} object. If INSERT operation, id of the newly inserted row. Otherwise, number
-     * of rows affected.
-     */
-    public ResultSet execute(SQLiteDatabase db) {
-        beforeExecute();
-        ResultSet rs = new ResultSet();
-        switch (actionValue) {
-            case SELECT:
-                Cursor c = performQuery(db);
-                rs.setCursor(c);
-                break;
-            case INSERT:
-                rs.setRowId(
-                        performInsert(db)
-                );
-                break;
-            case UPDATE:
-                rs.setRowAffected(
-                        performUpdate(db)
-                );
-                break;
-            case DELETE:
-                rs.setRowAffected(
-                        performDelete(db)
-                );
-                break;
-            default:
-        }
-        return rs;
-    }
-
-    /**
-     * Perform the SELECT operation.
-     * @param db the SQLiteDatabase to be applied to
-     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
-     * {@link Cursor}s are not synchronized, see the documentation for more details.
-     */
-    public Cursor performQuery(SQLiteDatabase db) {
-        String[] selectionArgs = mWhere == null ? null : mWhere.getStringArgs();
-        return db.rawQuery(sql, selectionArgs);
-    }
-
-    /**
-     * Create a new SQLiteStatement.
-     * @param db the SQLiteDatabase to be applied to
-     * @return a {@link SQLiteStatement} object
-     */
-    private SQLiteStatement createStatement(SQLiteDatabase db) {
-        SQLiteStatement statement = db.compileStatement(sql);
-        for (int i = 0; i < values.size(); i++) {
-            DatabaseUtils.bindObjectToProgram(statement, i + 1, values.get(i));
-        }
-        return statement;
-    }
-
-    /**
-     * Perform INSERT operation.
-     * @param db the SQLiteDatabase to be applied to
-     * @return the id of the newly inserted row
-     */
-    private long performInsert(SQLiteDatabase db) {
-        long rowId = -1;
-        db.acquireReference();
-        try {
-            SQLiteStatement statement = createStatement(db);
-            try {
-                rowId = statement.executeInsert();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            db.releaseReference();
-        }
-        return rowId;
-    }
-
-    /**
-     * Perform the UPDATE operation.
-     * @param db the SQLiteDatabase to be applied to
-     * @return number of rows affected
-     */
-    private int performUpdate(SQLiteDatabase db) {
-        int affectedRows = 0;
-        db.acquireReference();
-        try {
-            SQLiteStatement statement = createStatement(db);
-            try {
-                affectedRows = statement.executeUpdateDelete();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            db.releaseReference();
-        }
-        return affectedRows;
-    }
-
-    /**
-     * Perform the DELETE operation.
-     * @param db the SQLiteDatabase to be applied to
-     * @return number of rows affected
-     */
-    private int performDelete(SQLiteDatabase db) {
-        int rowsAffected = 0;
-        db.acquireReference();
-        try {
-            SQLiteStatement statement = createStatement(db);
-            try {
-                rowsAffected = statement.executeUpdateDelete();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            db.releaseReference();
-        }
-        return rowsAffected;
-    }
-
-    /**
-     * Do something before execute this Query.
-     */
-    private void beforeExecute() {
-        if (sql == null) {
-            getSql();
-        }
-    }
+//    /**
+//     * Execute this Query.
+//     * @param db the SQLiteDatabase to be applied to
+//     * @return a {@link ResultSet} object. If it's SELECT operation, it would contain a
+//     * {@link Cursor} object. If INSERT operation, id of the newly inserted row. Otherwise, number
+//     * of rows affected.
+//     */
+//    public ResultSet execute(SQLiteDatabase db) {
+//        beforeExecute();
+//        ResultSet rs = new ResultSet();
+//        switch (actionValue) {
+//            case SELECT:
+//                Cursor c = performQuery(db);
+//                rs.setCursor(c);
+//                break;
+//            case INSERT:
+//                rs.setRowId(
+//                        performInsert(db)
+//                );
+//                break;
+//            case UPDATE:
+//                rs.setRowAffected(
+//                        performUpdate(db)
+//                );
+//                break;
+//            case DELETE:
+//                rs.setRowAffected(
+//                        performDelete(db)
+//                );
+//                break;
+//            default:
+//        }
+//        return rs;
+//    }
+//
+//    /**
+//     * Perform the SELECT operation.
+//     * @param db the SQLiteDatabase to be applied to
+//     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+//     * {@link Cursor}s are not synchronized, see the documentation for more details.
+//     */
+//    public Cursor performQuery(SQLiteDatabase db) {
+//        String[] selectionArgs = mWhere == null ? null : mWhere.getStringArgs();
+//        return db.rawQuery(sql, selectionArgs);
+//    }
+//
+//    /**
+//     * Create a new SQLiteStatement.
+//     * @param db the SQLiteDatabase to be applied to
+//     * @return a {@link SQLiteStatement} object
+//     */
+//    private SQLiteStatement createStatement(SQLiteDatabase db) {
+//        SQLiteStatement statement = db.compileStatement(sql);
+//        for (int i = 0; i < values.size(); i++) {
+//            DatabaseUtils.bindObjectToProgram(statement, i + 1, values.get(i));
+//        }
+//        return statement;
+//    }
+//
+//    /**
+//     * Perform INSERT operation.
+//     * @param db the SQLiteDatabase to be applied to
+//     * @return the id of the newly inserted row
+//     */
+//    private long performInsert(SQLiteDatabase db) {
+//        long rowId = -1;
+//        db.acquireReference();
+//        try {
+//            SQLiteStatement statement = createStatement(db);
+//            try {
+//                rowId = statement.executeInsert();
+//            } finally {
+//                statement.close();
+//            }
+//        } finally {
+//            db.releaseReference();
+//        }
+//        return rowId;
+//    }
+//
+//    /**
+//     * Perform the UPDATE operation.
+//     * @param db the SQLiteDatabase to be applied to
+//     * @return number of rows affected
+//     */
+//    private int performUpdate(SQLiteDatabase db) {
+//        int affectedRows = 0;
+//        db.acquireReference();
+//        try {
+//            SQLiteStatement statement = createStatement(db);
+//            try {
+//                affectedRows = statement.executeUpdateDelete();
+//            } finally {
+//                statement.close();
+//            }
+//        } finally {
+//            db.releaseReference();
+//        }
+//        return affectedRows;
+//    }
+//
+//    /**
+//     * Perform the DELETE operation.
+//     * @param db the SQLiteDatabase to be applied to
+//     * @return number of rows affected
+//     */
+//    private int performDelete(SQLiteDatabase db) {
+//        int rowsAffected = 0;
+//        db.acquireReference();
+//        try {
+//            SQLiteStatement statement = createStatement(db);
+//            try {
+//                rowsAffected = statement.executeUpdateDelete();
+//            } finally {
+//                statement.close();
+//            }
+//        } finally {
+//            db.releaseReference();
+//        }
+//        return rowsAffected;
+//    }
+//
+//    /**
+//     * Do something before execute this Query.
+//     */
+//    public void beforeExecute() {
+//        if (sql == null) {
+//            getSql();
+//        }
+//    }
 
     /**
      * Compile and return the sql String.
@@ -608,7 +608,11 @@ public class Query {
         return values;
     }
 
-    public interface Callback {
-        void onResult(Cursor cursor);
+    public int getActionValue() {
+        return actionValue;
+    }
+
+    public Where getWhere() {
+        return mWhere;
     }
 }

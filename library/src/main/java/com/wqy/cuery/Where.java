@@ -27,11 +27,17 @@ public class Where {
         args = new LinkedList<>();
     }
 
+    /**
+     * @param belong the {@link Query} object holds this
+     */
     public Where(Query belong) {
         this();
         this.query = belong;
     }
 
+    /**
+     * @return where clause without 'WHERE'
+     */
     public String getWhereClause() {
         if (where == null) {
             where = builder.toString();
