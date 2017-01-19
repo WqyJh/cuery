@@ -1,9 +1,10 @@
-# Cuery - A Semantic API for SQLiteDatabase
+# Cuery - A Streaming API for SQLiteDatabase
 Exhausted by SQL concatenations,
 I developed this simple util to simplify my data-accessing job.
 ## Features
 1. Streaming API.
 2. Use `SQLiteStatement` to query, which means a higher performance.
+3. Synchronous and asynchronous query.
 
 ## Useage
 Before executing an `Query`,
@@ -82,3 +83,20 @@ the row ID of the newly inserted row.
 
 When using a UPDATE or DELETE Query, `ResultSet.getRowAffected()`
 returns the number of rows that affected by the query.
+
+You could use **asynchronous** query simply by `executeAsync(db, callback)`.
+```java
+        Query query = new Query();
+        query.select("username", "password")
+                .table("User")
+                .startWhere()
+                .whereEqualTo("username", username)
+                .whereEqualTo("password", password)
+                .endWhere()
+                .executeAsync(db, new Executor.Callback() {
+                     @Override
+                     public void onResult(ResultSet rs) {
+                        // To use the ResultSet
+                     }
+                });
+```
