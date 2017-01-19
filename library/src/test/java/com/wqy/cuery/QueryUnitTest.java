@@ -26,8 +26,9 @@ public class QueryUnitTest {
                 .orderByAsc("c1")
                 .orderByDesc("c3")
                 .limit(10)
-                .offset(18);
-        String expected = "SELECT c1,c2,c3 FROM User WHERE c1=? AND c2 GLOB 'xixi' GROUP BY c3,c4 HAVING sum(c3) < ? ORDER BY c1 ASC,c3 DESC LIMIT ? OFFSET ?";
+                .offset(18)
+                .distinct();
+        String expected = "SELECT DISTINCT c1,c2,c3 FROM User WHERE c1=? AND c2 GLOB 'xixi' GROUP BY c3,c4 HAVING sum(c3) < ? ORDER BY c1 ASC,c3 DESC LIMIT ? OFFSET ?";
         assertEquals(expected, query.getSql());
         assertArrayEquals(new Object[] {11, 14, 10, 18}, query.getValues().toArray());
     }

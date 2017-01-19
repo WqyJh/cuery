@@ -32,5 +32,6 @@ public class WhereTest {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         db.execSQL("INSERT INTO Test(" + DBContract.Test.BLOB + ") VALUES(?)");
+
     }
 }

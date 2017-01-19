@@ -54,6 +54,13 @@ public class Query {
         values = new ArrayList<>();
     }
 
+    /**
+     * Execute this Query.
+     * @param db the SQLiteDatabase to be applied to
+     * @return a {@link ResultSet} object. If it's SELECT operation, it would contain a
+     * {@link Cursor} object. If INSERT operation, id of the newly inserted row. Otherwise, number
+     * of rows affected.
+     */
     public ResultSet execute(SQLiteDatabase db) {
         beforeExecute();
         ResultSet rs = new ResultSet();
@@ -82,12 +89,22 @@ public class Query {
         return rs;
     }
 
-
+    /**
+     * Perform the SELECT operation.
+     * @param db the SQLiteDatabase to be applied to
+     * @return A {@link Cursor} object, which is positioned before the first entry. Note that
+     * {@link Cursor}s are not synchronized, see the documentation for more details.
+     */
     public Cursor performQuery(SQLiteDatabase db) {
         String[] selectionArgs = mWhere == null ? null : mWhere.getStringArgs();
         return db.rawQuery(sql, selectionArgs);
     }
 
+    /**
+     * Create a new SQLiteStatement.
+     * @param db the SQLiteDatabase to be applied to
+     * @return a {@link SQLiteStatement} object
+     */
     private SQLiteStatement createStatement(SQLiteDatabase db) {
         SQLiteStatement statement = db.compileStatement(sql);
         for (int i = 0; i < values.size(); i++) {
@@ -96,7 +113,12 @@ public class Query {
         return statement;
     }
 
-    public long performInsert(SQLiteDatabase db) {
+    /**
+     * Perform INSERT operation.
+     * @param db the SQLiteDatabase to be applied to
+     * @return the id of the newly inserted row
+     */
+    private long performInsert(SQLiteDatabase db) {
         long rowId = -1;
         db.acquireReference();
         try {
@@ -112,7 +134,12 @@ public class Query {
         return rowId;
     }
 
-    public int performUpdate(SQLiteDatabase db) {
+    /**
+     * Perform the UPDATE operation.
+     * @param db the SQLiteDatabase to be applied to
+     * @return number of rows affected
+     */
+    private int performUpdate(SQLiteDatabase db) {
         int affectedRows = 0;
         db.acquireReference();
         try {
@@ -128,7 +155,12 @@ public class Query {
         return affectedRows;
     }
 
-    public int performDelete(SQLiteDatabase db) {
+    /**
+     * Perform the DELETE operation.
+     * @param db the SQLiteDatabase to be applied to
+     * @return number of rows affected
+     */
+    private int performDelete(SQLiteDatabase db) {
         int rowsAffected = 0;
         db.acquireReference();
         try {
@@ -144,12 +176,19 @@ public class Query {
         return rowsAffected;
     }
 
-    public void beforeExecute() {
+    /**
+     * Do something before execute this Query.
+     */
+    private void beforeExecute() {
         if (sql == null) {
             getSql();
         }
     }
 
+    /**
+     * Compile and return the sql String.
+     * @return sql String
+     */
     public String getSql() {
         if (sql != null) {
             return sql;
@@ -179,6 +218,9 @@ public class Query {
         return sql;
     }
 
+    /**
+     * Compile SELECT operation.
+     */
     private void compileSelect() {
         sqlBuilder.append("SELECT ");
         if (distinct) {
@@ -198,6 +240,9 @@ public class Query {
         limitOffset();
     }
 
+    /**
+     * Compile INSERT operation.
+     */
     private void compileInsert() {
         sqlBuilder.append("INSERT INTO ").append(table)
                 .append(" (");
@@ -213,6 +258,9 @@ public class Query {
         values.addAll(insertValue);
     }
 
+    /**
+     * Compile UPDATE operation.
+     */
     private void compileUpdate() {
         sqlBuilder.append("UPDATE ").append(table)
                 .append(" SET ");
@@ -225,12 +273,19 @@ public class Query {
         appendWhere();
     }
 
+    /**
+     * Compile DELETE operation.
+     */
     private void compileDelete() {
         sqlBuilder.append("DELETE FROM ").append(table);
 
         appendWhere();
     }
 
+    /**
+     * Append the place holders '?' to the sqlBuilder.
+     * @param num number of place holders
+     */
     private void appendPlaceHolder(int num) {
         for (int i = 0; i < num - 1; i++) {
             sqlBuilder.append("?,");
@@ -238,6 +293,10 @@ public class Query {
         sqlBuilder.append("?");
     }
 
+    /**
+     * Append columns to sqlBuilder.
+     * @param columns
+     */
     private void appendColumns(List<String> columns) {
         Iterator<String> iterator = columns.iterator();
         int size = columns.size();
@@ -248,6 +307,9 @@ public class Query {
         sqlBuilder.append(iterator.next());
     }
 
+    /**
+     * Append WHERE clause to the sqlBuilder.
+     */
     private void appendWhere() {
         if (mWhere != null) {
             where = mWhere.getWhereClause();
@@ -256,6 +318,9 @@ public class Query {
         }
     }
 
+    /**
+     * Append GROUP BY clause to the sqlBuilder.
+     */
     private void appendGroup() {
         if (groupCount > 0) {
             group = groupBuilder.toString();
@@ -267,6 +332,9 @@ public class Query {
         }
     }
 
+    /**
+     * Append ORDER BY clause to the sqlBuilder.
+     */
     private void appendOrder() {
         if (orderCount > 0) {
             sqlBuilder.append(" ORDER BY ");
@@ -275,6 +343,9 @@ public class Query {
         }
     }
 
+    /**
+     * Compile the LIMIT and OFFSET clause.
+     */
     private void limitOffset() {
         if (limit > 0) {
             sqlBuilder.append(" LIMIT ?");
@@ -287,46 +358,83 @@ public class Query {
         }
     }
 
+    /**
+     * Indicate this Query is a SELECT operation.
+     * @return this Query
+     */
     public Query select() {
         actionValue = SELECT;
         this.action = "SELECT";
         return this;
     }
 
+    /**
+     * Indicate this Qeury is a INSERT operation.
+     * @return this Query
+     */
     public Query insert() {
         actionValue = INSERT;
         this.action = "INSERT INTO";
         return this;
     }
 
+    /**
+     * Indicate this Query is a UPDATE operation.
+     * @return this Query
+     */
     public Query update() {
         actionValue = UPDATE;
         this.action = "UPDATE";
         return this;
     }
 
+    /**
+     * Indicate this Query is a DELETE operation.
+     * @return this Query
+     */
     public Query delete() {
         actionValue = DELETE;
         this.action = "DELETE";
         return this;
     }
 
+    /**
+     * Indicate this Query is a SELECT operation.
+     * @param columns columns to be selected
+     * @return this Query
+     */
     public Query select(String... columns) {
         select();
         this.columns(columns);
         return this;
     }
 
+    /**
+     * Set the table to be applied to.
+     * @param table table name
+     * @return this Query
+     */
     public Query table(@NonNull String table) {
         this.table = table;
         return this;
     }
 
+    /**
+     * Set the columns in INSERT operation.
+     * @param columns column names
+     * @return this Query
+     */
     public Query columns(@NonNull String... columns) {
         this.columns.addAll(Arrays.asList(columns));
         return this;
     }
 
+    /**
+     * Add the SET clause in UPDATE operation.
+     * @param column column name
+     * @param value value to be set to the column
+     * @return this Query
+     */
     public Query set(@NonNull String column, Object value) {
         beforeUpdate();
         updateBuilder.append(column).append("=?");
@@ -335,10 +443,9 @@ public class Query {
     }
 
     /**
-     * Only used for INSERT.
-     *
-     * @param values
-     * @return
+     * Add the VALUES clause in INSERT operation.
+     * @param values values to be inserted
+     * @return this Query
      */
     public Query values(Object... values) {
         if (insertValue == null) {
@@ -348,6 +455,9 @@ public class Query {
         return this;
     }
 
+    /**
+     * Do something before add the SET clause in UPDATE operation.
+     */
     private void beforeUpdate() {
         if (updateValues == null) {
             updateValues = new ArrayList<>();
@@ -361,6 +471,11 @@ public class Query {
         updateCount++;
     }
 
+    /**
+     * Add the ORDER BY clause with ASC.
+     * @param column column name
+     * @return this Query
+     */
     public Query orderByAsc(String column) {
         beforeOrder();
         orderBuilder.append(column).append(" ASC");
@@ -368,6 +483,11 @@ public class Query {
         return this;
     }
 
+    /**
+     * Add the ORDER BY clause with DESC.
+     * @param column column name
+     * @return this Query
+     */
     public Query orderByDesc(String column) {
         beforeOrder();
         orderBuilder.append(column).append(" DESC");
@@ -375,6 +495,9 @@ public class Query {
         return this;
     }
 
+    /**
+     * Do something before add the ORDER BY clause.
+     */
     private void beforeOrder() {
         if (orderBuilder == null) {
             orderBuilder = new StringBuilder();
@@ -384,6 +507,11 @@ public class Query {
         }
     }
 
+    /**
+     * Add the GROUP BY clause.
+     * @param columns column names
+     * @return this Query
+     */
     public Query groupBy(String... columns) {
         if (groupBuilder == null) {
             groupBuilder = new StringBuilder();
@@ -398,6 +526,10 @@ public class Query {
         return this;
     }
 
+    /**
+     * Do something before add the GROUP BY clause.
+     */
+    @Deprecated
     private void beforeGroup() {
         if (groupBuilder == null) {
             groupBuilder = new StringBuilder();
@@ -407,37 +539,71 @@ public class Query {
         }
     }
 
+    /**
+     * Add the HAVING clause.
+     * @param condition condition string using '?' as parameters and dividing by ','
+     * @param values values bind to the parameters
+     * @return this Query
+     */
     public Query having(String condition, Object... values) {
         this.having = condition;
         havingValue = Arrays.asList(values);
         return this;
     }
 
+    /**
+     * Set the nullable columns used in SELECT.
+     * @param columns nullable columns.
+     * @return this Query
+     */
+    @Deprecated
     public Query nullableColumns(String... columns) {
         this.nullableColumns = Arrays.asList(columns);
         return this;
     }
 
+    /**
+     * Start WHERE clause. If invoked for multiple times, only the last invoke is effective.
+     * @return a new {@link Where} object
+     */
     public Where startWhere() {
         mWhere = new Where(this);
         return mWhere;
     }
 
+    /**
+     * Add LIMIT clause.
+     * @param n limit number
+     * @return this Query
+     */
     public Query limit(int n) {
         this.limit = n;
         return this;
     }
 
+    /**
+     * Add OFFSET clause.
+     * @param n offset number
+     * @return this Query
+     */
     public Query offset(int n) {
         this.offset = n;
         return this;
     }
 
+    /**
+     * To distinct the query result.
+     * @return this Query
+     */
     public Query distinct() {
         distinct = true;
         return this;
     }
 
+    /**
+     * Get the values that would be bind to parameters corresponding to '?'.
+     * @return list of values
+     */
     public List<Object> getValues() {
         return values;
     }
